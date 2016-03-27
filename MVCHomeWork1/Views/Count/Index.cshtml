@@ -1,0 +1,32 @@
+﻿@model IEnumerable<MVCHomeWork1.Models.VW_HomeWorkCount1>
+
+@{
+    ViewBag.Title = "數量檢視";
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+    <div> 
+        <table class="table">
+            <tr>
+                <th>客戶名稱</th>
+                <th>銀行資訊數量</th>
+                <th>聯絡人數量</th>
+            </tr>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.客戶名稱</td>
+                    <td>@item.銀行資訊數量</td>
+                    <td>@item.聯絡人數量</td>
+                </tr>
+            }
+        </table>
+    </div>
+</body>
+</html>
