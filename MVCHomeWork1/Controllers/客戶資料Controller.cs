@@ -109,10 +109,13 @@ namespace MVCHomeWork1.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
+            客戶資料 l_客戶資料 = db.客戶資料.Find(id);
+            l_客戶資料.客戶銀行資訊.AsQueryable().ToList().ForEach(a => a.已刪除 = true);
+            l_客戶資料.客戶聯絡人.AsQueryable().ToList().ForEach(a => a.已刪除 = true);
             //db.客戶資料.Remove(客戶資料);
-            客戶資料.已刪除 = true;
+          
             
+             
             db.SaveChanges();
             return RedirectToAction("Index");
         }
