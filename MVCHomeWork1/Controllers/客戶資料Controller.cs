@@ -10,14 +10,15 @@ using MVCHomeWork1.Models;
 
 namespace MVCHomeWork1.Controllers
 {
-    public class 客戶資料Controller : Controller
+    public class 客戶資料Controller : BaseController
     {
-        private 客戶資料Entities db = new 客戶資料Entities();
+        //private 客戶資料Entities db = new 客戶資料Entities();
 
         // GET: 客戶資料
         public ActionResult Index()
         {
-            return View(db.客戶資料.ToList());
+            var data = repo客戶資料.All();
+            return View(data);
         }
 
         // GET: 客戶資料/Details/5
@@ -27,7 +28,7 @@ namespace MVCHomeWork1.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
+            客戶資料 客戶資料 = repo客戶資料.Find(id);
             if (客戶資料 == null)
             {
                 return HttpNotFound();
@@ -50,8 +51,9 @@ namespace MVCHomeWork1.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.客戶資料.Add(客戶資料);
-                db.SaveChanges();
+                repo客戶資料.Add(客戶資料);
+                //db.SaveChanges();
+                repo客戶資料.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
 
@@ -65,7 +67,7 @@ namespace MVCHomeWork1.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
+            客戶資料 客戶資料 = repo客戶資料.Find(id);
             if (客戶資料 == null)
             {
                 return HttpNotFound();
@@ -82,8 +84,9 @@ namespace MVCHomeWork1.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(客戶資料).State = EntityState.Modified;
-                db.SaveChanges();
+                var l_客戶資料 = (客戶資料Entities)repo客戶資料.UnitOfWork.Context;
+                l_客戶資料.Entry(客戶資料).State = EntityState.Modified;
+                repo客戶資料.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
             return View(客戶資料);
@@ -96,7 +99,7 @@ namespace MVCHomeWork1.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
+            客戶資料 客戶資料 = repo客戶資料.Find(id);
             if (客戶資料 == null)
             {
                 return HttpNotFound();
@@ -109,14 +112,15 @@ namespace MVCHomeWork1.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            客戶資料 l_客戶資料 = db.客戶資料.Find(id);
+            客戶資料 l_客戶資料 = repo客戶資料.Find(id);
+            l_客戶資料.已刪除 = true;
             l_客戶資料.客戶銀行資訊.AsQueryable().ToList().ForEach(a => a.已刪除 = true);
             l_客戶資料.客戶聯絡人.AsQueryable().ToList().ForEach(a => a.已刪除 = true);
-            //db.客戶資料.Remove(客戶資料);
-          
-            
-             
-            db.SaveChanges();
+            //repo客戶資料.Remove(客戶資料);
+
+
+
+            repo客戶資料.UnitOfWork.Commit();
             return RedirectToAction("Index");
         }
 
@@ -126,7 +130,7 @@ namespace MVCHomeWork1.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
+            客戶資料 客戶資料 = repo客戶資料.Find(id);
             if (客戶資料 == null)
             {
                 return HttpNotFound();
@@ -138,11 +142,11 @@ namespace MVCHomeWork1.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult RecoverConfirmed(int id)
         {
-            客戶資料 客戶資料 = db.客戶資料.Find(id);
-            //db.客戶資料.Remove(客戶資料);
+            客戶資料 客戶資料 = repo客戶資料.Find(id);
+            //repo客戶資料.Remove(客戶資料);
             客戶資料.已刪除 = false;
 
-            db.SaveChanges();
+            repo客戶資料.UnitOfWork.Commit();
             return RedirectToAction("Index");
         }
 
@@ -151,7 +155,7 @@ namespace MVCHomeWork1.Controllers
         public ActionResult index()
         {
             string keyword = Request["queryKeyword"];
-            var 客戶資料 = db.客戶資料;
+            var 客戶資料 = repo客戶資料;
             if (!string.IsNullOrEmpty(keyword))
             {                
                
@@ -163,11 +167,50 @@ namespace MVCHomeWork1.Controllers
             }
            
         }
+        public FileResult ExportExcel()
+        {
+   
+            
+            
+            NPOI.HSSF.UserModel.HSSFWorkbook book = new NPOI.HSSF.UserModel.HSSFWorkbook();
+       
+            NPOI.SS.UserModel.ISheet sheet1 = book.CreateSheet("Sheet1");
+
+            IQueryable<客戶資料> 客戶資料 = repo客戶資料.All();
+
+            NPOI.SS.UserModel.IRow row1 = sheet1.CreateRow(0);
+            row1.CreateCell(0).SetCellValue("客戶名稱");
+            row1.CreateCell(1).SetCellValue("統一編號");
+            row1.CreateCell(2).SetCellValue("電話");
+            row1.CreateCell(3).SetCellValue("傳真");
+            row1.CreateCell(4).SetCellValue("地址");
+            row1.CreateCell(5).SetCellValue("Email");
+            int RowNum = 1;
+            foreach (var cust in 客戶資料)
+            {
+                NPOI.SS.UserModel.IRow rowtemp = sheet1.CreateRow(RowNum);
+                rowtemp.CreateCell(0).SetCellValue(cust.客戶名稱.ToString());
+                rowtemp.CreateCell(1).SetCellValue(cust.統一編號.ToString());
+                rowtemp.CreateCell(2).SetCellValue(cust.電話.ToString());
+                rowtemp.CreateCell(3).SetCellValue(cust.傳真.ToString());
+                rowtemp.CreateCell(4).SetCellValue(cust.地址.ToString());
+                rowtemp.CreateCell(5).SetCellValue(cust.Email.ToString());
+                RowNum++;
+            }
+           
+            System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            book.Write(ms);
+            
+            DateTime dt = DateTime.Now;
+            string dateTime = dt.ToString("yyyyMMddHHmm");
+            string fileName = "客戶資料" + dateTime + ".xls";
+            return File(ms.ToArray(), "application/vnd.ms-excel", fileName);
+        }  
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                db.Dispose();
+                 repo客戶資料.UnitOfWork.Context.Dispose();
             }
             base.Dispose(disposing);
         }

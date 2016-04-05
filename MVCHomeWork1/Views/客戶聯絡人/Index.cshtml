@@ -25,10 +25,11 @@
     @Html.ActionLink("Create New", "Create")
     <input type="checkbox" id="showDelete" onclick="showDel()"><label>顯示刪除資料</label>
 
-    @using (Html.BeginForm("query", "客戶聯絡人", FormMethod.Post))
+    @using (Html.BeginForm("index", "客戶聯絡人", FormMethod.Post))
     {
         <input type="text" name="queryKeyword" id="queryKeyword" width="120" />@:&nbsp;<input type="submit" value="查詢" />
    }
+    @Html.ActionLink("匯出資料", "ExportExcel")
 </p>
 <table class="table">
     <tr>
