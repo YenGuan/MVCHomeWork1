@@ -10,6 +10,7 @@ using MVCHomeWork1.Models;
 
 namespace MVCHomeWork1.Controllers
 {
+    [ShowActionTime]
     public class 客戶聯絡人Controller : BaseController
     {
         //private 客戶資料Entities db = new 客戶資料Entities();

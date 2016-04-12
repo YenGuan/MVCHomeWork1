@@ -18,7 +18,19 @@
         }
         
     }
-    
+    function ddlchange() {
+        var cate = $('#category').val();
+      
+        $.ajax({
+            url: '@Url.Action("Index", "客戶資料")',
+            data: { p_cate: cate },
+            datatype: "html",
+            type: "GET",
+            }).done(function () {
+               
+            });
+
+    }
 </script>
 <h2>客戶資料</h2>
 
@@ -33,6 +45,11 @@
     <input type="text" name="queryKeyword" id="queryKeyword" width="120" />@:&nbsp;<input type="submit" value="查詢" />
    }
    @Html.ActionLink("匯出資料", "ExportExcel")
+ 
+</p>
+<p>
+  @Html.Label("分類:")
+  @Html.DropDownList("category", (IEnumerable<SelectListItem>)ViewBag.category, new { onchange = "ddlchange();" })
 </p>
 <table class="table">
     <tr>
@@ -54,11 +71,15 @@
         <th>
             @Html.DisplayNameFor(model => model.Email)
         </th>
+        <th>
+            @Html.DisplayNameFor(model => model.分類)
+        </th>
         <th></th>
     </tr>
 
     @foreach (var item in Model)
     {
+       
         if (item.已刪除 == false)
         {
             
@@ -83,12 +104,16 @@
                     @Html.DisplayFor(modelItem => item.Email)
                 </td>
                 <td>
+                    @Html.DisplayFor(modelItem => item.分類)
+                </td>
+                <td>
                     @Html.ActionLink("編輯", "Edit", new { id = item.Id }) |
                     @Html.ActionLink("詳細資訊", "Details", new { id = item.Id }) |
                     @Html.ActionLink("刪除", "Delete", new { id = item.Id })
                 </td>
             </tr>
         }
+       
         else
         {
             <tr class="del" style="display:none">
@@ -110,6 +135,9 @@
                 </td>
                 <td style="color:red" >
                     @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.分類)
                 </td>
                 <td style="color:red">
                     @Html.ActionLink("編輯", "Edit", new { id = item.Id }) |

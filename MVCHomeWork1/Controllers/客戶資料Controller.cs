@@ -13,14 +13,44 @@ namespace MVCHomeWork1.Controllers
     public class 客戶資料Controller : BaseController
     {
         //private 客戶資料Entities db = new 客戶資料Entities();
-
+        [ShowActionTime]
         // GET: 客戶資料
-        public ActionResult Index()
+        public ActionResult Index(string p_cate)
         {
-            var data = repo客戶資料.All();
-            return View(data);
+           
+            if (p_cate != null)
+            {
+                var data = repo客戶資料.Where(p=>p.分類==p_cate);
+                ViewBag.category = getCategory(data);
+                return View(data);
+            }
+
+          
+            var data1 = repo客戶資料.All();
+            ViewBag.category = getCategory(data1);
+            return View(data1);
         }
 
+        private IQueryable<SelectListItem> getCategory(IQueryable<客戶資料> data)
+        {
+
+            return data
+                .AsQueryable()
+                .Select(s => new SelectListItem()
+                        {
+                            Value = s.分類,
+                            Text = s.分類
+                        })
+                     ;
+
+        }
+
+
+
+
+
+      
+     
         // GET: 客戶資料/Details/5
         public ActionResult Details(int? id)
         {
@@ -47,7 +77,7 @@ namespace MVCHomeWork1.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email")] 客戶資料 客戶資料)
+        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,分類")] 客戶資料 客戶資料)
         {
             if (ModelState.IsValid)
             {
@@ -80,7 +110,7 @@ namespace MVCHomeWork1.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email")] 客戶資料 客戶資料)
+        public ActionResult Edit([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,分類")] 客戶資料 客戶資料)
         {
             if (ModelState.IsValid)
             {
@@ -157,23 +187,23 @@ namespace MVCHomeWork1.Controllers
             string keyword = Request["queryKeyword"];
             var 客戶資料 = repo客戶資料;
             if (!string.IsNullOrEmpty(keyword))
-            {                
-               
+            {
+
                 return View(客戶資料.Where(p => p.客戶名稱 == keyword));
             }
             else
             {
                 return View(客戶資料);
             }
-           
+
         }
         public FileResult ExportExcel()
         {
-   
-            
-            
+
+
+
             NPOI.HSSF.UserModel.HSSFWorkbook book = new NPOI.HSSF.UserModel.HSSFWorkbook();
-       
+
             NPOI.SS.UserModel.ISheet sheet1 = book.CreateSheet("Sheet1");
 
             IQueryable<客戶資料> 客戶資料 = repo客戶資料.All();
@@ -197,20 +227,20 @@ namespace MVCHomeWork1.Controllers
                 rowtemp.CreateCell(5).SetCellValue(cust.Email.ToString());
                 RowNum++;
             }
-           
+
             System.IO.MemoryStream ms = new System.IO.MemoryStream();
             book.Write(ms);
-            
+
             DateTime dt = DateTime.Now;
             string dateTime = dt.ToString("yyyyMMddHHmm");
             string fileName = "客戶資料" + dateTime + ".xls";
             return File(ms.ToArray(), "application/vnd.ms-excel", fileName);
-        }  
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                 repo客戶資料.UnitOfWork.Context.Dispose();
+                repo客戶資料.UnitOfWork.Context.Dispose();
             }
             base.Dispose(disposing);
         }
