@@ -15,17 +15,15 @@ namespace MVCHomeWork1.Models
         public int Id { get; set; }
         
         [StringLength(50, ErrorMessage="欄位長度不得大於 50 個字元")]
-        [Required(ErrorMessage="必填欄位")]
+        [Required]
         public string 客戶名稱 { get; set; }
         
-        [StringLength(8, ErrorMessage="名稱長度不得大於 8 個字元")]
-        [Required(ErrorMessage = "必填欄位")]
-       
+        [StringLength(8, ErrorMessage="欄位長度不得大於 8 個字元")]
+        [Required]
         public string 統一編號 { get; set; }
-
-        [StringLength(50, ErrorMessage = "欄位長度不得大於 50 個字元！")]
-        [Required(ErrorMessage = "必填欄位")]
-        [PhoneAttribute]
+        
+        [StringLength(50, ErrorMessage="欄位長度不得大於 50 個字元")]
+        [Required]
         public string 電話 { get; set; }
         
         [StringLength(50, ErrorMessage="欄位長度不得大於 50 個字元")]
@@ -35,27 +33,20 @@ namespace MVCHomeWork1.Models
         public string 地址 { get; set; }
         
         [StringLength(250, ErrorMessage="欄位長度不得大於 250 個字元")]
-        [EmailAddress(ErrorMessage = "不合規之電子郵件位址")]        
         public string Email { get; set; }
-       
+        [Required]
         public bool 已刪除 { get; set; }
+        
+        [StringLength(10, ErrorMessage="欄位長度不得大於 10 個字元")]
+        public string 分類 { get; set; }
+        
+        [StringLength(50, ErrorMessage="欄位長度不得大於 50 個字元")]
+        public string 帳號 { get; set; }
+        
+       
+        public string 密碼 { get; set; }
     
         public virtual ICollection<客戶銀行資訊> 客戶銀行資訊 { get; set; }
         public virtual ICollection<客戶聯絡人> 客戶聯絡人 { get; set; }
-    }
-
-    public partial class 客戶資料 : IValidatableObject
-    {
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (!string.IsNullOrEmpty(this.統一編號))
-            { 
-                if (this.統一編號.Length !=8 )
-                {                                     //錯誤字顯示                       顯示欄位 不給值顯示在該content上方
-                    yield return new ValidationResult("必須為八碼", new string[] { "統一編號" });
-                }
-            }
-        }
-
     }
 }

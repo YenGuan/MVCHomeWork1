@@ -49,7 +49,7 @@ namespace MVCHomeWork1.Models
     public class LoginViewModel
     {
         [Required]
-        [Display(Name = "電子郵件")]
+        [Display(Name = "帳號")]
         [EmailAddress]
         public string Email { get; set; }
 
@@ -66,7 +66,7 @@ namespace MVCHomeWork1.Models
     {
         [Required]
         [EmailAddress]
-        [Display(Name = "電子郵件")]
+        [Display(Name = "帳號")]
         public string Email { get; set; }
 
         [Required]

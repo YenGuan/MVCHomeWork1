@@ -7,6 +7,11 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using MVCHomeWork1.Models;
+using PagedList;
+using PagedList.Mvc;
+using System.Web.Helpers;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace MVCHomeWork1.Controllers
 {
@@ -15,20 +20,21 @@ namespace MVCHomeWork1.Controllers
         //private 客戶資料Entities db = new 客戶資料Entities();
         [ShowActionTime]
         // GET: 客戶資料
-        public ActionResult Index(string p_cate)
+        public ActionResult Index(string p_category, string queryKeyword, int p_page = 1)
         {
-           
-            if (p_cate != null)
-            {
-                var data = repo客戶資料.Where(p=>p.分類==p_cate);
-                ViewBag.category = getCategory(data);
-                return View(data);
-            }
 
-          
-            var data1 = repo客戶資料.All();
-            ViewBag.category = getCategory(data1);
-            return View(data1);
+            var data = repo客戶資料.All();
+            ViewBag.p_category = getCategory(data);
+            if (!string.IsNullOrEmpty(p_category))
+            {
+                data = data.Where(p => p.分類 == p_category);                 
+            }
+            if (!string.IsNullOrEmpty(queryKeyword))
+            {
+                data = data.Where(p => p.客戶名稱 == queryKeyword);
+            }
+            var outData = data.OrderBy(p=>p.Id).ToPagedList(p_page, 10);
+            return View(outData);
         }
 
         private IQueryable<SelectListItem> getCategory(IQueryable<客戶資料> data)
@@ -77,10 +83,11 @@ namespace MVCHomeWork1.Controllers
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,分類")] 客戶資料 客戶資料)
+        public ActionResult Create([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,分類,帳號,密碼")] 客戶資料 客戶資料)
         {
             if (ModelState.IsValid)
             {
+                客戶資料.密碼 = Encode(客戶資料.密碼);
                 repo客戶資料.Add(客戶資料);
                 //db.SaveChanges();
                 repo客戶資料.UnitOfWork.Commit();
@@ -89,7 +96,7 @@ namespace MVCHomeWork1.Controllers
 
             return View(客戶資料);
         }
-
+      
         // GET: 客戶資料/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -98,23 +105,34 @@ namespace MVCHomeWork1.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             客戶資料 客戶資料 = repo客戶資料.Find(id);
+
             if (客戶資料 == null)
             {
                 return HttpNotFound();
             }
+            客戶資料.密碼 = "";
             return View(客戶資料);
         }
-
+        public string Encode(string password)
+        {
+            if (!string.IsNullOrEmpty(password))
+            {
+                return Crypto.HashPassword(password);
+            }
+            return null;
+        }
+      
         // POST: 客戶資料/Edit/5
         // 若要免於過量張貼攻擊，請啟用想要繫結的特定屬性，如需
         // 詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,分類")] 客戶資料 客戶資料)
+        public ActionResult Edit([Bind(Include = "Id,客戶名稱,統一編號,電話,傳真,地址,Email,分類,帳號,密碼")] 客戶資料 客戶資料)
         {
             if (ModelState.IsValid)
             {
                 var l_客戶資料 = (客戶資料Entities)repo客戶資料.UnitOfWork.Context;
+                客戶資料.密碼 = Encode(客戶資料.密碼);
                 l_客戶資料.Entry(客戶資料).State = EntityState.Modified;
                 repo客戶資料.UnitOfWork.Commit();
                 return RedirectToAction("Index");
@@ -181,23 +199,8 @@ namespace MVCHomeWork1.Controllers
         }
 
 
-        [HttpPost]
-        public ActionResult index()
-        {
-            string keyword = Request["queryKeyword"];
-            var 客戶資料 = repo客戶資料;
-            if (!string.IsNullOrEmpty(keyword))
-            {
 
-                return View(客戶資料.Where(p => p.客戶名稱 == keyword));
-            }
-            else
-            {
-                return View(客戶資料);
-            }
-
-        }
-        public FileResult ExportExcel()
+        public FileResult ExportExcel(string p_category, string queryKeyword)
         {
 
 
@@ -207,7 +210,14 @@ namespace MVCHomeWork1.Controllers
             NPOI.SS.UserModel.ISheet sheet1 = book.CreateSheet("Sheet1");
 
             IQueryable<客戶資料> 客戶資料 = repo客戶資料.All();
-
+            if (!string.IsNullOrEmpty(p_category))
+            {
+                客戶資料 = 客戶資料.Where(p => p.分類 == p_category);
+            }
+            if (!string.IsNullOrEmpty(queryKeyword))
+            {
+                客戶資料 = 客戶資料.Where(p => p.客戶名稱 == queryKeyword);
+            }
             NPOI.SS.UserModel.IRow row1 = sheet1.CreateRow(0);
             row1.CreateCell(0).SetCellValue("客戶名稱");
             row1.CreateCell(1).SetCellValue("統一編號");

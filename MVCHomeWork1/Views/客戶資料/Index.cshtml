@@ -4,6 +4,7 @@
     ViewBag.Title = "客戶資料";
 }
 <script>
+
     function showDel() {
        
         var chk = $('#showDelete');
@@ -18,38 +19,25 @@
         }
         
     }
-    function ddlchange() {
-        var cate = $('#category').val();
-      
-        $.ajax({
-            url: '@Url.Action("Index", "客戶資料")',
-            data: { p_cate: cate },
-            datatype: "html",
-            type: "GET",
-            }).done(function () {
-               
-            });
-
-    }
+   
 </script>
 <h2>客戶資料</h2>
-
+@using (Html.BeginForm("Index", "客戶資料", FormMethod.Get, new { name = "form1" }))
+{
+    @Html.Hidden("p_page")
 <p>
     @Html.ActionLink("新增客戶資料", "Create")
     &nbsp;
     <input type="checkbox" id="showDelete" onclick="showDel()"><label>顯示刪除資料</label>
     &nbsp;
     &nbsp;
-   @using (Html.BeginForm("index", "客戶資料", FormMethod.Post))
-   {
-    <input type="text" name="queryKeyword" id="queryKeyword" width="120" />@:&nbsp;<input type="submit" value="查詢" />
-   }
-   @Html.ActionLink("匯出資料", "ExportExcel")
+  
+    <input type="text" name="queryKeyword" id="queryKeyword" width="120" />&nbsp;<input type="submit" value="查詢" />
  
 </p>
 <p>
   @Html.Label("分類:")
-  @Html.DropDownList("category", (IEnumerable<SelectListItem>)ViewBag.category, new { onchange = "ddlchange();" })
+  @Html.DropDownList("p_category", null, "請選擇類別", new { onchange = "this.form.submit();" })
 </p>
 <table class="table">
     <tr>
@@ -149,4 +137,26 @@
     }
 
 </table>
+}
+@using PagedList.Mvc;
+@using PagedList;
+@Html.PagedListPager(Model as IPagedList,
+    p => Url.Action("Index", new { p_page = p }))
+
+<div id="details"></div>
+
+@section scripts {
+    <script>
+        $(function () {
+            $('.pagination a').on('click', function () {
+                document.form1.p_page.value = $(this).text();
+                document.form1.submit();
+                return false;
+            });
+        });
+    </script>
+}
+
+
+
 
